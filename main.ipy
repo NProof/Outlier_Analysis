@@ -126,18 +126,17 @@ if __name__ == '__main__':
     
     err_raw = pd.read_csv('./dataset/err-0001.csv')
     
-    timeErr_raw = err_raw['time'].apply(lambda _ : pd.to_datetime(_))
+    ser_dup_err = ~err_raw['time'].duplicated()
+    f_err_raw = err_raw[ser_dup_err].reset_index(drop=True).dropna()
+    timestamp_err = f_err_raw.pop('time').apply(lambda _ : pd.to_datetime(_))
+    f_err_raw.index = timestamp_err
     
-    non_duplicated = ~timeErr_raw.duplicated()
-    err = err_raw[non_duplicated].dropna().reset_index(drop=True)
-    timeErr = timeErr_raw[non_duplicated].dropna().reset_index(drop=True)
-    
-    time_err = convertTime(timeErr)
+    time_err = convertTime(timestamp_err)
     # print(time_err)
     
-    tlErr = pd.DataFrame({'time' : timeErr.values, 'label' : err['label'].values})
+    tlErr = pd.DataFrame({'time' : f_err_raw.index.to_series(), 'label' : f_err_raw['label'].values})
     
-    f_err = err[column_names]
+    f_err = f_err_raw[column_names]
     
     groupedErr = f_err.groupby(
         [
