@@ -36,7 +36,7 @@ def decoder(latent_dim, output_dim):
 
 tf.debugging.enable_check_numerics()
  
-class VAE(keras.Model):
+class LVAE(keras.Model):
     def __init__(self, latent_dim, fDim, **kwargs):
         super(VAE, self).__init__(**kwargs)
         self.encoder = encoder(latent_dim, fDim)
