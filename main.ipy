@@ -92,6 +92,7 @@ def trainModel(unitFrames, file_name_save):
 
 if __name__ == '__main__':
     
+    tf.debugging.enable_check_numerics()
     tf.keras.backend.set_floatx('float64')
     tf.keras.backend.floatx()
     

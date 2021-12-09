@@ -32,9 +32,6 @@ def decoder(latent_dim, output_dim):
     x1 = layers.Dense(48, kernel_initializer='random_normal', bias_initializer='zeros')(x2)
     decoder_outputs = layers.Dense(output_dim, kernel_initializer='random_normal', bias_initializer='zeros')(x1)
     return keras.Model(latent_inputs, [x1, x2, x3, decoder_outputs], name="decoder")
-
-
-tf.debugging.enable_check_numerics()
  
 class LVAE(keras.Model):
     def __init__(self, latent_dim, fDim, **kwargs):
