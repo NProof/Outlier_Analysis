@@ -156,9 +156,9 @@ if __name__ == '__main__':
     unstackMErr = meanErr_drop.unstack(level=1).dropna() # unstackMErr.stack(level=1) # [Redo -> avg_FDate_drop]
     print(unstackMErr)
     
-    unstackLabel = tlErr.groupby(lambda i: time_err['d'].iloc[i]).apply(lambda i : i['label'].any())
-    
     test = unstackMErr
+    
+    unstackLabel = tlErr.groupby(lambda i: time_err['d'].loc[i]).apply(lambda i : i['label'].any())
     
     c_test = transferESpace(model, test)
     k_test = pd.DataFrame(kde.score_samples(c_test), index=test.index, columns=['densityln'])
