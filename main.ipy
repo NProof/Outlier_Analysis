@@ -45,7 +45,7 @@ def convertTime(timestamp):
     
 def dataPreProcessing(f_df_raw, column_indices, time):
     if time is None:
-       time = convertTime(f_df_raw.index)
+        time = convertTime(f_df_raw.index)
        
     f_df = pd.DataFrame(f_df_raw[column_indices], index=f_df_raw.index)
     
