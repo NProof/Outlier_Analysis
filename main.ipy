@@ -153,13 +153,11 @@ if __name__ == '__main__':
         'predict' : k_test.z
         })
     
-    '''
     fig, axs = plt.subplots(2, figsize=(100, 15))
     axs[0].plot(timestamp, f_df_raw['冰機Q(sum)'], 'b.')
-    axs[1].plot(timeErr[~err.label], f_err[~err.label]['冰機Q(sum)'], 'g.')
-    axs[1].plot(timeErr[err.label], f_err[err.label]['冰機Q(sum)'], 'r.')
+    axs[1].plot(f_err_raw.index.to_series()[~f_err_raw.label], f_err_raw[~f_err_raw.label]['冰機Q(sum)'], 'g.')
+    axs[1].plot(f_err_raw.index.to_series()[f_err_raw.label], f_err_raw[f_err_raw.label]['冰機Q(sum)'], 'r.')
     plt.show()
-    '''
     
     precision_recall_fscore_support(metric_Day.ground_true, metric_Day.predict > -3)
     
