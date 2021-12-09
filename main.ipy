@@ -43,7 +43,7 @@ def convertTime(timestamp):
     time = pd.DataFrame(data={'d':date.values, 'h':hour.values, 'm':minute.values}, index=timestamp)
     return time
     
-def dataPreProcessing(f_df, time, transformer1):
+def dataPreProcessing(f_df, time):
     if time is None:
         time = convertTime(f_df_raw.index)
     
@@ -65,8 +65,6 @@ def dataPreProcessing(f_df, time, transformer1):
     assert all(countDay2 == iteDay) # sum(countDay2 != iteDay) == 0
     unitFrames = avg_FDate_drop.unstack(level=1).dropna() # unitFrames.stack(level=1) # [Redo -> avg_FDate_drop]
     
-    f_df[:] = transformer1.inverse_transform(f_df)
-    print(f_df)
     return unitFrames
 
 def transferESpace(model, data):
@@ -114,7 +112,10 @@ if __name__ == '__main__':
     transformer1 = preprocessing.RobustScaler().fit(f_df)
     f_df[:] = transformer1.transform(f_df)
     
-    train = dataPreProcessing(f_df, time, transformer1)
+    train = dataPreProcessing(f_df, time)
+    
+    f_df[:] = transformer1.inverse_transform(f_df)
+    print(f_df)
     
     model, history = trainModel(train, './weightsModel/1209-1')
     
