@@ -43,14 +43,9 @@ def convertTime(timestamp):
     time = pd.DataFrame(data={'d':date.values, 'h':hour.values, 'm':minute.values}, index=timestamp)
     return time
     
-def dataPreProcessing(f_df_raw, column_indices, time):
+def dataPreProcessing(f_df, column_names, time, transformer1):
     if time is None:
         time = convertTime(f_df_raw.index)
-       
-    f_df = pd.DataFrame(f_df_raw[column_indices], index=f_df_raw.index)
-    
-    transformer1 = preprocessing.RobustScaler().fit(f_df)
-    f_df[:] = transformer1.transform(f_df)
     
     date = time['d'].loc[f_df.index]
     hour = time['h'].loc[f_df.index]
@@ -114,7 +109,12 @@ if __name__ == '__main__':
     
     column_names = featureSelecting(f_df_raw)
     
-    train = dataPreProcessing(f_df_raw, column_names, time)
+    f_df = pd.DataFrame(f_df_raw[column_names], index=f_df_raw.index)
+    
+    transformer1 = preprocessing.RobustScaler().fit(f_df)
+    f_df[:] = transformer1.transform(f_df)
+    
+    train = dataPreProcessing(f_df, column_names, time, transformer1)
     
     model, history = trainModel(train, './weightsModel/1209-1')
     
