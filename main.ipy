@@ -138,25 +138,7 @@ if __name__ == '__main__':
     
     f_err = f_err_raw[column_names]
     
-    groupedErr = f_err.groupby(
-        [
-          lambda i: time_err['d'][i], 
-          lambda i : (60 * time_err['h'][i] + time_err['m'][i]) // 15
-          ]
-        )
-    meanErr = groupedErr.mean()
-    
-    countDay1 = meanErr.groupby(level=0).apply(lambda _ : len(_))
-    meanErr_drop = meanErr.drop((
-        countDay1.loc[countDay1 != iteDay]
-        ).index)
-    
-    countDay2 = meanErr_drop.groupby(level=0).apply(lambda _ : len(_))
-    assert all(countDay2 == iteDay) # sum(countDay2 != iteDay) == 0
-    unstackMErr = meanErr_drop.unstack(level=1).dropna() # unstackMErr.stack(level=1) # [Redo -> avg_FDate_drop]
-    print(unstackMErr)
-    
-    test = unstackMErr
+    test = dataPreProcessing(f_err, time_err)
     
     unstackLabel = tlErr.groupby(lambda i: time_err['d'].loc[i]).apply(lambda i : i['label'].any())
     
