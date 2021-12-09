@@ -116,7 +116,6 @@ if __name__ == '__main__':
     
     f_df[:] = transformer1.inverse_transform(f_df)
     print(f_df)
-    '''
     model, history = trainModel(train, './weightsModel/1209-1')
     
     c = transferESpace(model, train)
@@ -173,11 +172,13 @@ if __name__ == '__main__':
         'predict' : k_test.z
         })
     
+    '''
     fig, axs = plt.subplots(2, figsize=(100, 15))
     axs[0].plot(timestamp, f_df_raw['冰機Q(sum)'], 'b.')
     axs[1].plot(timeErr[~err.label], f_err[~err.label]['冰機Q(sum)'], 'g.')
     axs[1].plot(timeErr[err.label], f_err[err.label]['冰機Q(sum)'], 'r.')
     plt.show()
+    '''
     
     precision_recall_fscore_support(metric_Day.ground_true, metric_Day.predict > -3)
     
@@ -186,4 +187,3 @@ if __name__ == '__main__':
     
     plt.plot(fpr, tpr)
     plt.show()
-    '''
