@@ -145,7 +145,6 @@ if __name__ == '__main__':
     c_test = transferESpace(model, test)
     k_test = pd.DataFrame(kde.score_samples(c_test), index=test.index, columns=['densityln'])
     
-    # k = pd.DataFrame(kde.score_samples(c), index=train.index, columns=['densityln'])
     k_test['z'] = (pd.DataFrame(k_test.densityln) - k.densityln.mean()) / k_test.densityln.std()
     
     metric_Day = pd.DataFrame(data={
