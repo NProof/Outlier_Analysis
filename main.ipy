@@ -98,7 +98,6 @@ if __name__ == '__main__':
     
     ser_dup = ~df_raw['時間'].duplicated()
     f_df_raw = df_raw[ser_dup].reset_index(drop=True).dropna()
-    
     timestamp = f_df_raw.pop('時間').apply(lambda _ : pd.to_datetime(_))
     f_df_raw.index = timestamp
     # print(f_df_raw)
