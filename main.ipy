@@ -103,6 +103,8 @@ if __name__ == '__main__':
     f_df_raw.index = timestamp
     # print(f_df_raw)
     
+    time = convertTime(timestamp)
+    # print(time)
     
     column_names = featureSelecting(f_df_raw)
     f_df = pd.DataFrame(f_df_raw[column_names], index=f_df_raw.index)
