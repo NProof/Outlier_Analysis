@@ -95,16 +95,14 @@ if __name__ == '__main__':
     tf.keras.backend.floatx()
     
     df_raw = pd.read_csv('./dataset/Merge.csv')
-    non_dup_df_raw = df_raw[~df_raw['時間'].duplicated()].reset_index(drop=True)
-    non_dup_f_df_raw = non_dup_df_raw.dropna()
     
-    f_df_raw = non_dup_f_df_raw.copy()
+    ser_dup = ~df_raw['時間'].duplicated()
+    f_df_raw = df_raw[ser_dup].reset_index(drop=True).dropna()
     
     timestamp = f_df_raw.pop('時間').apply(lambda _ : pd.to_datetime(_))
-    time = convertTime(timestamp)
-    # print(time)
     f_df_raw.index = timestamp
     # print(f_df_raw)
+    
     
     column_names = featureSelecting(f_df_raw)
     f_df = pd.DataFrame(f_df_raw[column_names], index=f_df_raw.index)
@@ -116,7 +114,7 @@ if __name__ == '__main__':
     
     f_df[:] = transformer1.inverse_transform(f_df)
     print(f_df)
-    
+    '''
     model, history = trainModel(train, './weightsModel/1209-1')
     
     c = transferESpace(model, train)
@@ -186,3 +184,4 @@ if __name__ == '__main__':
     
     plt.plot(fpr, tpr)
     plt.show()
+    '''
