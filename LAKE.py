@@ -38,7 +38,7 @@ tf.debugging.enable_check_numerics()
  
 class LVAE(keras.Model):
     def __init__(self, latent_dim, fDim, **kwargs):
-        super(VAE, self).__init__(**kwargs)
+        super(LVAE, self).__init__(**kwargs)
         self.encoder = encoder(latent_dim, fDim)
         self.decoder = decoder(latent_dim, fDim)
         self.total_loss_tracker = keras.metrics.Mean(name="total_loss")
