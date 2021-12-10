@@ -101,7 +101,27 @@ if __name__ == '__main__':
     
     f_df1 = pd.DataFrame(transformer.transform(f_df), index=f_df.index, columns=f_df.columns)
     
-    train = dataPreProcessing2(f_df1, time)
+    # train = dataPreProcessing2(f_df1, time)
+    
+    date = time['d'].loc[f_df.index]
+    hour = time['h'].loc[f_df.index]
+    minute = time['m'].loc[f_df.index]
+    
+    avg_FDate = f_df.groupby(
+        [
+          lambda i : date[i], 
+          lambda i : ( hour[i] * 60 + minute[i] // delta )
+        ]).mean()
+    
+    countDay1 = avg_FDate.groupby(level=0).apply(lambda _ : len(_))
+    avg_FDate_drop = avg_FDate.drop((
+        countDay1.loc[countDay1 != iteDay]
+        ).index)
+    countDay2 = avg_FDate_drop.groupby(level=0).apply(lambda _ : len(_))
+    assert all(countDay2 == iteDay) # sum(countDay2 != iteDay) == 0
+    unitFrames = avg_FDate_drop.unstack(level=1).dropna() # unitFrames.stack(level=1) # [Redo -> avg_FDate_drop]
+    
+    # # # # # # # # # # # # # # #
     
     # f_df2 = pd.DataFrame(transformer.inverse_transform(f_df1), index=f_df1.index, columns=f_df1.columns)
     '''
