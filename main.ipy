@@ -100,9 +100,11 @@ if __name__ == '__main__':
     transformer = preprocessing.RobustScaler().fit(f_df)
     
     f_df1 = pd.DataFrame(transformer.transform(f_df), index=f_df.index, columns=f_df.columns)
-    train = dataPreProcessing(f_df1, time)
-    # f_df2 = pd.DataFrame(transformer.inverse_transform(f_df1), index=f_df1.index, columns=f_df1.columns)
     
+    train = dataPreProcessing2(f_df1, time)
+    
+    # f_df2 = pd.DataFrame(transformer.inverse_transform(f_df1), index=f_df1.index, columns=f_df1.columns)
+    '''
     model, history = trainModel(train, './weightsModel/1209-1')
     
     c = model.transferESpace(train)
@@ -156,4 +158,4 @@ if __name__ == '__main__':
     
     plt.plot(fpr, tpr)
     plt.show()
-    
+    '''
