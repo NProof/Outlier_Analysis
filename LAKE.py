@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import numpy as np
+from scipy.spatial import distance
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -97,3 +99,14 @@ class LVAE(keras.Model):
                 "reconstruction_loss": self.reconstruction_loss_tracker.result(),
                 "kl_loss": self.kl_loss_tracker.result(),
             }
+        
+    def transferESpace(self, data):
+        _, _, _, _, _, z = self.encoder.predict(data)
+        _, _, _, reconstruction = self.decoder(z)
+        r = np.array(
+            [
+              [distance.euclidean(i, j), distance.cosine(i, j)]
+              for i, j in zip(tf.convert_to_tensor(data), reconstruction)])
+        
+        c = np.concatenate([z, r], axis=1)
+        return c

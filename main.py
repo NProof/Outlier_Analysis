@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import numpy as np
+# import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 # %matplotlib inline
@@ -8,7 +8,6 @@ from sklearn import preprocessing
 import tensorflow as tf
 from tensorflow import keras
 from sklearn.neighbors import KernelDensity
-from scipy.spatial import distance
 # from scipy.stats import zscore
 from sklearn.metrics import roc_auc_score, roc_curve
 from sklearn.metrics import precision_recall_fscore_support
@@ -67,17 +66,6 @@ def dataPreProcessing(f_df, time):
     
     return unitFrames
 
-def transferESpace(model, data):
-    _, _, _, _, _, z = model.encoder.predict(data)
-    _, _, _, reconstruction = model.decoder(z)
-    r = np.array(
-        [
-          [distance.euclidean(i, j), distance.cosine(i, j)]
-          for i, j in zip(tf.convert_to_tensor(train), reconstruction)])
-    
-    c = np.concatenate([z, r], axis=1)
-    return c
-
 def trainModel(unitFrames, file_name_save):
     model = LVAE(latent_dim = 6, fDim = unitFrames.shape[1])
     model.compile(optimizer=keras.optimizers.Adam(learning_rate=3e-5))
@@ -118,7 +106,7 @@ if __name__ == '__main__':
     print(f_df)
     model, history = trainModel(train, './weightsModel/1209-1')
     
-    c = transferESpace(model, train)
+    c = model.transferESpace(train)
     kde = KernelDensity(kernel='gaussian', bandwidth=h).fit(c)
     k = pd.DataFrame(kde.score_samples(c), index=train.index, columns=['densityln'])
     
@@ -150,7 +138,7 @@ if __name__ == '__main__':
     
     unstackLabel = tlErr.groupby(lambda i: time_err['d'].loc[i]).apply(lambda i : i['label'].any())
     
-    c_test = transferESpace(model, test)
+    c_test = model.transferESpace(test)
     k_test = pd.DataFrame(kde.score_samples(c_test), index=test.index, columns=['densityln'])
     
     k_test['z'] = (pd.DataFrame(k_test.densityln) - k.densityln.mean()) / k_test.densityln.std()
