@@ -3,7 +3,7 @@
 # import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-# %matplotlib inline
+%matplotlib inline
 from sklearn import preprocessing
 import tensorflow as tf
 from tensorflow import keras
@@ -21,7 +21,7 @@ h = 5
 
 def featureSelecting(f_df_raw):
     X = f_df_raw
-    pfa = PFA(n_features=10)
+    pfa = PFA(n_features=4)
     pfa.fit(X)
     
     # To get the transformed matrix
