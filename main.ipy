@@ -121,6 +121,7 @@ if __name__ == '__main__':
     assert all(countDay2 == iteDay) # sum(countDay2 != iteDay) == 0
     unitFrames = avg_FDate_drop.unstack(level=1).dropna() # unitFrames.stack(level=1) # [Redo -> avg_FDate_drop]
     
+    del date, hour, minute, avg_FDate, countDay1, avg_FDate_drop, countDay2
     # # # # # # # # # # # # # # #
     
     # f_df2 = pd.DataFrame(transformer.inverse_transform(f_df1), index=f_df1.index, columns=f_df1.columns)
