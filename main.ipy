@@ -16,7 +16,7 @@ from LAKE import LVAE
 from feature_selection import PFA
 
 delta = 15
-iteDay = 1440/delta
+iteDay = 1440//delta
 h = 5
 
 def featureSelecting(f_df_raw):
@@ -53,7 +53,7 @@ def dataPreProcessing(f_df, time):
     avg_FDate = f_df.groupby(
         [
           lambda i : date[i], 
-          lambda i : ( hour[i] * 60 + minute[i] // delta )
+          lambda i : (hour[i] * 60 + minute[i]) // delta
         ]).mean()
     
     countDay1 = avg_FDate.groupby(level=0).apply(lambda _ : len(_))
@@ -88,13 +88,14 @@ def dataPreProcessing2(f_df, time):
     )
     return unitFrames
 
-def trainModel(unitFrames, file_name_save):
-    model = LVAE(latent_dim = 6, fDim = unitFrames.shape[1])
+def trainModel(data, file_name_save):
+    model = LVAE(latent_dim = 6, fDim = data.shape[1])
     model.compile(optimizer=keras.optimizers.Adam(learning_rate=3e-5))
-    history = model.fit(unitFrames, epochs=324, batch_size=8)
+    history = model.fit(data, epochs=10, batch_size=8)
     
     model.save_weights(file_name_save)
-    model = LVAE(latent_dim = 6, fDim = unitFrames.shape[1])
+    model = LVAE(latent_dim = 6, fDim = data.shape[1])
+    model.load_weights(file_name_save)
     return model, history
 
 if __name__ == '__main__':
