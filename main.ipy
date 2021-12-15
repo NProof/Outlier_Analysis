@@ -66,6 +66,28 @@ def dataPreProcessing(f_df, time):
     
     return unitFrames
 
+def dataPreProcessing2(f_df, time):
+    if time is None:
+        time = convertTime(f_df_raw.index)
+    
+    date = time['d'].loc[f_df.index]
+    hour = time['h'].loc[f_df.index]
+    minute = time['m'].loc[f_df.index]
+    
+    avg_FDate = f_df.groupby(
+        [
+          lambda i : date[i], 
+          lambda i : (hour[i] * 60 + minute[i]) // delta
+        ]).mean()
+    
+    unitFrames = pd.DataFrame(
+        {
+            avg_FDate.index[i]: avg_FDate.iloc[i:i+iteDay].reset_index(drop=True).reset_index(drop=True).unstack(level=0)
+            for i in range(len(avg_FDate)-iteDay) # range(10)
+        }
+    )
+    return unitFrames
+
 def trainModel(unitFrames, file_name_save):
     model = LVAE(latent_dim = 6, fDim = unitFrames.shape[1])
     model.compile(optimizer=keras.optimizers.Adam(learning_rate=3e-5))
@@ -100,28 +122,7 @@ if __name__ == '__main__':
     
     f_df1 = pd.DataFrame(transformer.transform(f_df), index=f_df.index, columns=f_df.columns)
     
-    # train = dataPreProcessing2(f_df1, time)
-    
-    date = time['d'].loc[f_df.index]
-    hour = time['h'].loc[f_df.index]
-    minute = time['m'].loc[f_df.index]
-    
-    avg_FDate = f_df.groupby(
-        [
-          lambda i : date[i], 
-          lambda i : ( hour[i] * 60 + minute[i] // delta )
-        ]).mean()
-    
-    countDay1 = avg_FDate.groupby(level=0).apply(lambda _ : len(_))
-    avg_FDate_drop = avg_FDate.drop((
-        countDay1.loc[countDay1 != iteDay]
-        ).index)
-    countDay2 = avg_FDate_drop.groupby(level=0).apply(lambda _ : len(_))
-    assert all(countDay2 == iteDay) # sum(countDay2 != iteDay) == 0
-    unitFrames = avg_FDate_drop.unstack(level=1).dropna() # unitFrames.stack(level=1) # [Redo -> avg_FDate_drop]
-    
-    del date, hour, minute, avg_FDate, countDay1, avg_FDate_drop, countDay2
-    # # # # # # # # # # # # # # #
+    train = dataPreProcessing2(f_df1, time).T
     
     # f_df2 = pd.DataFrame(transformer.inverse_transform(f_df1), index=f_df1.index, columns=f_df1.columns)
     '''
