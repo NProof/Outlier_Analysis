@@ -125,7 +125,7 @@ if __name__ == '__main__':
     train = dataPreProcessing2(f_df1, time).T
     
     # f_df2 = pd.DataFrame(transformer.inverse_transform(f_df1), index=f_df1.index, columns=f_df1.columns)
-    '''
+    
     file_name_save = './weightsModel/1215-1'
     model, history = trainModel(train, file_name_save)
     model.load_weights(file_name_save)
@@ -151,7 +151,7 @@ if __name__ == '__main__':
     f_err = f_err_raw[column_names]
     
     f_err1 = pd.DataFrame(transformer.transform(f_err), index=f_err.index, columns=f_err.columns)
-    test = dataPreProcessing(f_err, time_err)
+    test = dataPreProcessing2(f_err, time_err)
     # f_err2 = pd.DataFrame(transformer.transform(f_err1), index=f_err1.index, columns=f_err1.columns)
     
     unstackLabel = tlErr.groupby(lambda i: time_err['d'].loc[i]).apply(lambda i : i['label'].any())
@@ -160,7 +160,7 @@ if __name__ == '__main__':
     k_test = pd.DataFrame(kde.score_samples(c_test), index=test.index, columns=['densityln'])
     
     # ---------------------------------------------
-    
+    '''
     k_test['z'] = (pd.DataFrame(k_test.densityln) - k.densityln.mean()) / k_test.densityln.std()
     
     metric_Day = pd.DataFrame(data={
