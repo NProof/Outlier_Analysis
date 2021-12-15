@@ -125,7 +125,7 @@ if __name__ == '__main__':
     
     # f_df2 = pd.DataFrame(transformer.inverse_transform(f_df1), index=f_df1.index, columns=f_df1.columns)
     '''
-    file_name_save = './weightsModel/1209-1'
+    file_name_save = './weightsModel/1215-1'
     model, history = trainModel(train, file_name_save)
     model.load_weights(file_name_save)
     
