@@ -148,9 +148,10 @@ if __name__ == '__main__':
     time_err = convertTime(timestamp_err)
     # print(time_err)
     
-    tlErr = pd.DataFrame({'time' : f_err_raw.index.to_series(), 'label' : f_err_raw['label'].values})
-    
+    label = f_err_raw['label'].to_frame()
     f_err = f_err_raw[column_names]
+    
+    tlErr = pd.DataFrame({'time' : f_err.index.to_series(), 'label' : label.values})
     
     f_err1 = pd.DataFrame(transformer.transform(f_err), index=f_err.index, columns=f_err.columns)
     test = dataPreProcessing2(f_err, time_err).T
