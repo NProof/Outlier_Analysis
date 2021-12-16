@@ -164,8 +164,8 @@ if __name__ == '__main__':
     
     k_test['z'] = (pd.DataFrame(k_test.densityln) - k.densityln.mean()) / k_test.densityln.std()
     
-    metric_Day = pd.DataFrame(data=
-        {
+    metric_Day = pd.DataFrame(
+        data={
         'ground_true' : ~unstackLabel.loc[test.index], 
         'predict' : k_test.z
         }
