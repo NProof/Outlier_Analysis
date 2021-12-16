@@ -161,14 +161,16 @@ if __name__ == '__main__':
     k_test = pd.DataFrame(kde.score_samples(c_test), index=test.index, columns=['densityln'])
     
     # ---------------------------------------------
-    '''
+    
     k_test['z'] = (pd.DataFrame(k_test.densityln) - k.densityln.mean()) / k_test.densityln.std()
     
-    metric_Day = pd.DataFrame(data={
+    metric_Day = pd.DataFrame(data=
+        {
         'ground_true' : ~unstackLabel.loc[test.index], 
         'predict' : k_test.z
-        })
-        
+        }
+    )
+    '''
     fig, axs = plt.subplots(2, figsize=(100, 15))
     axs[0].plot(timestamp, f_df_raw['冰機Q(sum)'], 'b.')
     axs[1].plot(f_err_raw.index.to_series()[~f_err_raw.label], f_err_raw[~f_err_raw.label]['冰機Q(sum)'], 'g.')
