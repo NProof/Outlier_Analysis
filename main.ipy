@@ -155,7 +155,13 @@ if __name__ == '__main__':
     test = dataPreProcessing2(f_err, time_err).T
     # f_err2 = pd.DataFrame(transformer.transform(f_err1), index=f_err1.index, columns=f_err1.columns)
     
-    unstackLabel = label.groupby([lambda i : time_err.loc[i]['d']]).apply(lambda i : i['label'].any())
+    time_err['i'] = (60*time_err['h']+time_err['m']) // 15
+    
+    unstackLabel = label.groupby(
+        [
+            lambda i : time_err.loc[i]['d'], 
+            lambda i : time_err.loc[i]['i']
+        ]).apply(lambda i : i['label'].any())
     
     c_test = model.transferESpace(test)
     k_test = pd.DataFrame(kde.score_samples(c_test), index=test.index, columns=['densityln'])
@@ -166,7 +172,7 @@ if __name__ == '__main__':
     
     metric_Day = pd.DataFrame(
         data={
-        'ground_true' : ~unstackLabel.loc[test.index], 
+        'ground_true' : ~unstackLabel, 
         'predict' : k_test.z
         }
     )
@@ -176,6 +182,7 @@ if __name__ == '__main__':
     axs[1].plot(f_err_raw.index.to_series()[~f_err_raw.label], f_err_raw[~f_err_raw.label]['冰機Q(sum)'], 'g.')
     axs[1].plot(f_err_raw.index.to_series()[f_err_raw.label], f_err_raw[f_err_raw.label]['冰機Q(sum)'], 'r.')
     plt.show()
+    '''
     
     # precision_recall_fscore_support(metric_Day.ground_true, metric_Day.predict > -3)
     
@@ -184,4 +191,3 @@ if __name__ == '__main__':
     
     plt.plot(fpr, tpr)
     plt.show()
-    '''
