@@ -157,7 +157,7 @@ if __name__ == '__main__':
     test = dataPreProcessing2(f_err, time_err).T
     # f_err2 = pd.DataFrame(transformer.transform(f_err1), index=f_err1.index, columns=f_err1.columns)
     
-    unstackLabel = tlErr.groupby(lambda i: time_err['d'].loc[i]).apply(lambda i : i['label'].any())
+    unstackLabel = label.groupby([lambda i : time_err.loc[i]['d']]).apply(lambda i : i['label'].any())
     
     c_test = model.transferESpace(test)
     k_test = pd.DataFrame(kde.score_samples(c_test), index=test.index, columns=['densityln'])
