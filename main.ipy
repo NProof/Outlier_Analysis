@@ -151,8 +151,6 @@ if __name__ == '__main__':
     label = f_err_raw['label'].to_frame()
     f_err = f_err_raw[column_names]
     
-    tlErr = pd.DataFrame({'time' : f_err.index.to_series(), 'label' : label.values})
-    
     f_err1 = pd.DataFrame(transformer.transform(f_err), index=f_err.index, columns=f_err.columns)
     test = dataPreProcessing2(f_err, time_err).T
     # f_err2 = pd.DataFrame(transformer.transform(f_err1), index=f_err1.index, columns=f_err1.columns)
