@@ -130,10 +130,10 @@ if __name__ == '__main__':
     
     # f_df2 = pd.DataFrame(transformer.inverse_transform(f_df1), index=f_df1.index, columns=f_df1.columns)
     
-    file_name_save = './weightsModel/1215-1'
-    # model, history = trainModel(train, file_name_save)
-    model = LVAE(latent_dim = 6, fDim = train.shape[1])
-    model.load_weights(file_name_save)
+    file_name_save = './weightsModel/1217-1'
+    model, history = trainModel(train, file_name_save)
+    # model = LVAE(latent_dim = 6, fDim = train.shape[1])
+    # model.load_weights(file_name_save)
     
     c = model.transferESpace(train)
     kde = KernelDensity(kernel='gaussian', bandwidth=h).fit(c)
@@ -173,11 +173,11 @@ if __name__ == '__main__':
     
     k_test['z'] = (pd.DataFrame(k_test.densityln) - k.densityln.mean()) / k.densityln.std()
     
-    # dd1 = timedelta(days=1)
-    # show_d = [datetime.combine(d, datetime.min.time())+dd1/iteDay*i for d, i in k_test.index.to_series()]
-    # fig = plt.subplots(1, figsize=(70, 15))
-    # plt.plot(show_d, k_test.z)
-    # plt.show()
+    dd1 = timedelta(days=1)
+    show_d = [datetime.combine(d, datetime.min.time())+dd1/iteDay*i for d, i in k_test.index.to_series()]
+    fig = plt.subplots(1, figsize=(70, 15))
+    plt.plot(show_d, k_test.z)
+    plt.show()
     
     metric_Day = pd.DataFrame(
         data={
