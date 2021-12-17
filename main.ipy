@@ -168,14 +168,14 @@ if __name__ == '__main__':
     
     # ---------------------------------------------
     
-    k_test['z'] = (pd.DataFrame(k_test.densityln) - k.densityln.mean()) / k_test.densityln.std()
+    k_test['z'] = (pd.DataFrame(k_test.densityln) - k.densityln.mean()) / k.densityln.std()
     
     metric_Day = pd.DataFrame(
         data={
         'ground_true' : ~unstackLabel, 
         'predict' : k_test.z
         }
-    )
+    ).dropna()
     '''
     fig, axs = plt.subplots(2, figsize=(100, 15))
     axs[0].plot(timestamp, f_df_raw['冰機Q(sum)'], 'b.')
