@@ -12,6 +12,9 @@ from sklearn.neighbors import KernelDensity
 from sklearn.metrics import roc_auc_score, roc_curve
 from sklearn.metrics import precision_recall_fscore_support
 
+from datetime import datetime
+from datetime import timedelta
+
 from LAKE import LVAE
 from feature_selection import PFA
 
@@ -169,6 +172,12 @@ if __name__ == '__main__':
     # ---------------------------------------------
     
     k_test['z'] = (pd.DataFrame(k_test.densityln) - k.densityln.mean()) / k.densityln.std()
+    
+    # dd1 = timedelta(days=1)
+    # show_d = [datetime.combine(d, datetime.min.time())+dd1/iteDay*i for d, i in k_test.index.to_series()]
+    # fig = plt.subplots(1, figsize=(70, 15))
+    # plt.plot(show_d, k_test.z)
+    # plt.show()
     
     metric_Day = pd.DataFrame(
         data={
