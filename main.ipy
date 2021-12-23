@@ -132,9 +132,7 @@ if __name__ == '__main__':
     transformer = preprocessing.RobustScaler().fit(f_df)
     
     f_df1 = pd.DataFrame(transformer.transform(f_df), index=f_df.index, columns=f_df.columns)
-    
     train = dataPreProcessing2(f_df1, time).T
-    
     # f_df2 = pd.DataFrame(transformer.inverse_transform(f_df1), index=f_df1.index, columns=f_df1.columns)
     
     file_name_save = './weightsModel/1217-1'
