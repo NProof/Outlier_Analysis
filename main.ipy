@@ -14,6 +14,7 @@ from sklearn.metrics import precision_recall_fscore_support
 
 from datetime import datetime
 from datetime import timedelta
+from collections import deque
 
 from LAKE import LVAE
 from feature_selection import PFA
@@ -101,6 +102,12 @@ def trainModel(data, file_name_save):
     model.load_weights(file_name_save)
     return model, history
 
+def sliding_window(elements, window_size):
+    if len(elements) <= window_size:
+        return elements
+    for i in range(len(elements) - window_size + 1):
+        yield elements[i:i+window_size]
+        
 if __name__ == '__main__':
     
     tf.debugging.enable_check_numerics()
@@ -179,12 +186,29 @@ if __name__ == '__main__':
     plt.plot(show_d, k_test.z)
     plt.show()
     
+    #################
+    '''
+    n = 2
+    sw_gen = sliding_window(k_test[:10]['densityln'], 2*n-1)
+    for i in sw_gen:
+        print(i.std())
+    
+    # d = deque()
+    #     d.append(i)
+    #     if n > 1:
+    #         n = n - 1
+    #     else:
+    #        d.popleft()
+    '''
+    #################
+    
     metric_Day = pd.DataFrame(
         data={
         'ground_true' : ~unstackLabel, 
         'predict' : k_test.z
         }
     ).dropna()
+    
     '''
     fig, axs = plt.subplots(2, figsize=(100, 15))
     axs[0].plot(timestamp, f_df_raw['冰機Q(sum)'], 'b.')
@@ -200,3 +224,4 @@ if __name__ == '__main__':
     
     plt.plot(fpr, tpr)
     plt.show()
+    
