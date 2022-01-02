@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# import numpy as np
+from IPython.display import display
 import pandas as pd
 import matplotlib.pyplot as plt
 %matplotlib inline
@@ -8,12 +8,13 @@ from sklearn import preprocessing
 import tensorflow as tf
 from tensorflow import keras
 from sklearn.neighbors import KernelDensity
-# from scipy.stats import zscore
+from scipy.stats import zscore
 from sklearn.metrics import roc_auc_score, roc_curve
 from sklearn.metrics import precision_recall_fscore_support
 
 from datetime import datetime
 from datetime import timedelta
+from collections import deque
 
 from LAKE import LVAE
 from feature_selection import PFA
@@ -101,6 +102,20 @@ def trainModel(data, file_name_save):
     model.load_weights(file_name_save)
     return model, history
 
+def sliding_window(elements, window_size):
+    if len(elements) <= window_size:
+        return elements
+    for i in range(len(elements) - window_size + 1):
+        yield elements[i:i+window_size]
+        
+def showTimeSeries(k_test):
+    dd1 = timedelta(days=1)
+    show_d = [datetime.combine(d, datetime.min.time())+dd1/iteDay*i for d, i in k_test.index.to_series()]
+    fig = plt.subplots(1, figsize=(70, 15))
+    plt.plot(show_d, k_test.densityln)
+    plt.show()
+# showTimeSeries(k_test)
+        
 if __name__ == '__main__':
     
     tf.debugging.enable_check_numerics()
@@ -125,12 +140,10 @@ if __name__ == '__main__':
     transformer = preprocessing.RobustScaler().fit(f_df)
     
     f_df1 = pd.DataFrame(transformer.transform(f_df), index=f_df.index, columns=f_df.columns)
-    
     train = dataPreProcessing2(f_df1, time).T
-    
     # f_df2 = pd.DataFrame(transformer.inverse_transform(f_df1), index=f_df1.index, columns=f_df1.columns)
     
-    file_name_save = './weightsModel/1215-1'
+    file_name_save = './weightsModel/0102-1'
     # model, history = trainModel(train, file_name_save)
     model = LVAE(latent_dim = 6, fDim = train.shape[1])
     model.load_weights(file_name_save)
@@ -138,6 +151,8 @@ if __name__ == '__main__':
     c = model.transferESpace(train)
     kde = KernelDensity(kernel='gaussian', bandwidth=h).fit(c)
     k = pd.DataFrame(kde.score_samples(c), index=train.index, columns=['densityln'])
+    
+    showTimeSeries(k)
     
     # ---------------------------------------------
     
@@ -169,22 +184,59 @@ if __name__ == '__main__':
     c_test = model.transferESpace(test)
     k_test = pd.DataFrame(kde.score_samples(c_test), index=test.index, columns=['densityln'])
     
+    showTimeSeries(k_test)
+    
     # ---------------------------------------------
     
-    k_test['z'] = (pd.DataFrame(k_test.densityln) - k.densityln.mean()) / k.densityln.std()
+    # k_test['z'] = (pd.DataFrame(k_test.densityln) - k.densityln.mean()) / k.densityln.std()
+    k_test['z'] = zscore(k_test.densityln)
     
-    # dd1 = timedelta(days=1)
-    # show_d = [datetime.combine(d, datetime.min.time())+dd1/iteDay*i for d, i in k_test.index.to_series()]
-    # fig = plt.subplots(1, figsize=(70, 15))
-    # plt.plot(show_d, k_test.z)
-    # plt.show()
+    dd1 = timedelta(days=1)
+    show_d = [datetime.combine(d, datetime.min.time())+dd1/iteDay*i for d, i in k_test.index.to_series()]
+    fig = plt.subplots(1, figsize=(70, 15))
+    plt.plot(show_d, k_test.densityln)
+    plt.show()
+    
+    #################
+    
+    predict_df = pd.DataFrame()
+    n = iteDay
+    sw_gen = sliding_window(k_test['densityln'], 2*n-1)
+    for i in sw_gen:
+        i = i.reset_index()
+        target = i.iloc[n-1]
+        df = {
+                'level_0': target['level_0'], 
+                'level_1': target['level_1'],
+                'densityln' : target['densityln'],
+                'mean' : i['densityln'].mean(),
+                'std' : i['densityln'].std(),
+            }
+        predict_df = predict_df.append(df, ignore_index=True)
+    
+    predict_df = predict_df.set_index(['level_0', 'level_1'])
+    predict_df['ground_true'] = unstackLabel.loc[predict_df.index]
+    # predict_df['anomaly'] = (predict_df['densityln'] - predict_df['mean']) / predict_df['std']
+    predict_df['anomaly'] = zscore(predict_df['densityln'] - predict_df['mean'])
+    
+    fpr, tpr, thresholds = roc_curve(predict_df.ground_true, predict_df.anomaly, pos_label=1)
+    print( roc_auc_score(predict_df.ground_true, predict_df.anomaly) )
+    
+    plt.plot(fpr, tpr)
+    plt.show()
+    
+    display(precision_recall_fscore_support(predict_df.ground_true, predict_df.anomaly < -3))
+    
+    #################
     
     metric_Day = pd.DataFrame(
         data={
-        'ground_true' : ~unstackLabel, 
+        'ground_true' : unstackLabel, 
+        # 'predict' : k_test.densityln
         'predict' : k_test.z
         }
     ).dropna()
+
     '''
     fig, axs = plt.subplots(2, figsize=(100, 15))
     axs[0].plot(timestamp, f_df_raw['冰機Q(sum)'], 'b.')
@@ -193,10 +245,11 @@ if __name__ == '__main__':
     plt.show()
     '''
     
-    display(precision_recall_fscore_support(metric_Day.ground_true, metric_Day.predict > -3))
+    # display(precision_recall_fscore_support(metric_Day.ground_true, metric_Day.predict > -3))
     
     fpr, tpr, thresholds = roc_curve(metric_Day.ground_true, metric_Day.predict, pos_label=1)
     print( roc_auc_score(metric_Day.ground_true, metric_Day.predict) )
     
     plt.plot(fpr, tpr)
     plt.show()
+    
