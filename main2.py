@@ -27,7 +27,7 @@ if __name__ == '__main__':
     err = err.iloc[:25000]
     err = data_processing.deduplicate(err, subject='time')
     # add timestamp
-    t_sp_e = history['時間'].apply(lambda _ : pd.to_datetime(_))
-    time_e = data_processing.convertTime(t_sp_h)
+    t_sp_e = err['時間'].apply(lambda _ : pd.to_datetime(_))
+    time_e = data_processing.convertTime(t_sp_e)
     err.index = t_sp_e
     
