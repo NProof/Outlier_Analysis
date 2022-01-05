@@ -70,9 +70,9 @@ def dataPreProcessing(f_df, time):
     
     return unitFrames
 
-def dataPreProcessing2(f_df, time):
+def dataPreProcessing2(f_df, time = None):
     if time is None:
-        time = convertTime(f_df_raw.index)
+        time = convertTime(f_df_raw.index.to_series())
     
     date = time['d'].loc[f_df.index]
     hour = time['h'].loc[f_df.index]
