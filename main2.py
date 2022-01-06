@@ -10,6 +10,11 @@ import pandas as pd
 import datetime
 from statistics import mean
 
+from sklearn.metrics import roc_auc_score, roc_curve
+from sklearn.metrics import precision_recall_fscore_support
+from IPython.display import display
+import matplotlib.pyplot as plt
+
 import data_processing
 from sklearn import preprocessing
 from LAKE import tf, keras, LVAE
@@ -195,4 +200,12 @@ if __name__ == '__main__':
 
     a2['label'] = unstackLabel.iloc[a2.index]
     a3 = a2.dropna()
+    
+    # display(precision_recall_fscore_support(a3.label, a3["div"] > 10))
+    
+    # fpr, tpr, thresholds = roc_curve(a3.label, a3["div"], pos_label=1)
+    # print( roc_auc_score(a3.label, a3["div"]) )
+    
+    # plt.plot(fpr, tpr)
+    # plt.show()
     
