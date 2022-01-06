@@ -49,7 +49,7 @@ def meanErr(test, reconstruction_test):
         for i, r in row.iteritems():
             target = (
                 i[0], 
-                datetime.datetime(*date[0].timetuple()[:6]) + datetime.timedelta(hours=0.5) * (i[1] + date[1])
+                datetime.datetime(*date[0].timetuple()[:6]) + datetime.timedelta(minutes = delta) * (i[1] + date[1])
             )
             if target not in dfmap:
                 dfmap[target] = list()
