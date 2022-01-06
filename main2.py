@@ -5,6 +5,7 @@ Created on Thu Dec 23 14:29:13 2021
 @author: User
 """
 
+import numpy as np
 import pandas as pd
 import datetime
 from statistics import mean
@@ -62,6 +63,13 @@ def meanErr(test, reconstruction_test):
     a = pd.DataFrame(dfmean.values(), dfmean.keys())
     return a
     
+    
+def sliding_window(elements, window_size):
+    if len(elements) <= window_size:
+        return elements
+    for i in range(len(elements) - window_size + 1):
+        yield elements[i:i+window_size]
+
 
 if __name__ == '__main__':
     
@@ -127,6 +135,7 @@ if __name__ == '__main__':
     ### ### ### ### ### ### ### ### ### ### ### ### ###
         
     c = pd.concat(list_merr, keys=range(nums_models), axis=1, ignore_index=True)
+    del list_merr
     arg_opt = pd.DataFrame([abs(r).argmin() for i, r in c.iterrows()], index=c.index)
     # c['arg'] = arg_opt
     opt = pd.Series([r.loc[arg_opt.loc[i]].values[0] for i, r in c.iterrows()], index=c.index)
@@ -134,4 +143,26 @@ if __name__ == '__main__':
     
     opt_model = (c**2).mean().argmin()
     
+    std_df = pd.DataFrame()
+    n = iteDay
+    sw_gen = sliding_window(opt, 2*n-1)
+    for i in sw_gen:
+        scaler = preprocessing.MinMaxScaler()
+        scaler.fit(np.array(i).reshape([-1, 1]))
+        # scaler.transform(np.array(i).reshape([-1, 1]))
+        j = pd.DataFrame(scaler.transform(np.array(i**2).reshape([-1, 1])), index=i.index)
+        j = j.reset_index()
+        target = j.iloc[n-1]
+        df = {
+                'level_0': target['level_0'],
+                'level_1': target['level_1'],
+                'std' : j[0].std()
+            }
+        std_df = std_df.append(df, ignore_index=True)
+        
+    std_df = std_df.set_index(['level_0', 'level_1'])
     
+    std_df['opt'] = opt
+    std_df['div'] = std_df['opt'] / std_df['std']
+    
+    a = std_df.sort_values("div", ascending=False)
