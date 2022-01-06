@@ -47,21 +47,22 @@ def meanErr(test, reconstruction_test):
     
     for date, row in errtest[:].T.iteritems():
         for i, r in row.iteritems():
-            target = (
-                i[0], 
-                datetime.datetime(*date[0].timetuple()[:6]) + datetime.timedelta(minutes = delta) * (i[1] + date[1])
-            )
-            if target not in dfmap:
-                dfmap[target] = list()
-            dfmap[target].append(r)
+            virtualTime = datetime.datetime(*date[0].timetuple()[:6]) + datetime.timedelta(minutes = delta) * (i[1] + date[1])
+            if i[0] not in dfmap:
+                dfmap[i[0]] = dict()
+            if virtualTime not in dfmap[i[0]]:
+                dfmap[i[0]][virtualTime] = list()
+            dfmap[i[0]][virtualTime].append(r)
             
     dfmean = dict()        
     
-    for k, v in dfmap.items():
-        dfmean[k] = mean(v)
+    for f, m in dfmap.items():
+        for k, v in m.items():
+            if f not in dfmean:
+                dfmean[f] = dict()
+            dfmean[f][k] = mean(v)
         
-    a = pd.DataFrame(dfmean.values(), dfmean.keys())
-    return a
+    return pd.concat([pd.Series(m.values(), name=f, index=m.keys()) for f, m in dfmean.items()])
     
     
 def sliding_window(elements, window_size):
@@ -133,8 +134,10 @@ if __name__ == '__main__':
         
     del reconstruction_test
     ### ### ### ### ### ### ### ### ### ### ### ### ###
-        
-    c = pd.concat(list_merr, keys=range(nums_models), axis=1, ignore_index=True)
+    
+    # c0 = pd.concat(list_merr, axis=1)
+    c = pd.concat(list_merr, axis=1)**2
+    c.columns = pd.MultiIndex.from_tuples((i, j) for i, j in zip(range(nums_models), c.columns))
     del list_merr
     arg_opt = pd.DataFrame([abs(r).argmin() for i, r in c.iterrows()], index=c.index)
     # c['arg'] = arg_opt
@@ -153,16 +156,30 @@ if __name__ == '__main__':
         j = pd.DataFrame(scaler.transform(np.array(i**2).reshape([-1, 1])), index=i.index)
         j = j.reset_index()
         target = j.iloc[n-1]
+        t = target['index'].to_pydatetime()
+        k = (t.hour * 60 + t.minute) // delta
         df = {
-                'level_0': target['level_0'],
-                'level_1': target['level_1'],
+                'level_0': t.date(),
+                'level_1': int(k),
                 'std' : j[0].std()
             }
         std_df = std_df.append(df, ignore_index=True)
-        
     
-    std_df['opt'] = opt
     std_df['level_1'] = std_df['level_1'].astype(int)
+    std_df = std_df.set_index(['level_0', 'level_1'])
+    # std_df = std_df.reset_index()
+    
+    # _, b = zip(*opt.index)
+    opt2 = opt.to_frame()
+    t2 = pd.Series(opt.index.to_pydatetime(), index=opt.index)
+    opt2['level_0'] = t2.apply(lambda x : x.date())
+    h = t2.apply(lambda x : x.hour)
+    m = t2.apply(lambda x : x.minute)
+    opt2['level_1'] = (60*h+m) // delta
+    opt2 = opt2.set_index(['level_0', 'level_1'])
+    
+    std_df['opt'] = opt2
     std_df['div'] = std_df['opt'] / std_df['std']
     
-    a = std_df.sort_values("div", ascending=False)
+    # a = std_df.sort_values("div", ascending=False)
+    a2 = std_df.sort_values("div", ascending=False)
