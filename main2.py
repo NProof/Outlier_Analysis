@@ -183,3 +183,16 @@ if __name__ == '__main__':
     
     # a = std_df.sort_values("div", ascending=False)
     a2 = std_df.sort_values("div", ascending=False)
+    
+    time_e['i'] = (60*time_e['h']+time_e['m']) // 15
+    
+    unstackLabel = label.groupby(
+        [
+            lambda i : time_e.loc[i]['d'], 
+            lambda i : time_e.loc[i]['i']
+        ]
+    ).apply(lambda i : i['label'].any())
+
+    a2['label'] = unstackLabel.iloc[a2.index]
+    a3 = a2.dropna()
+    
