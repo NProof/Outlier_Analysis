@@ -108,7 +108,6 @@ if __name__ == '__main__':
     file_name_save = "weightsModel/Q0106-02"
     
     nums_models = 7
-    models = []
     list_merr = []
     
     for i in range(nums_models):
@@ -117,10 +116,9 @@ if __name__ == '__main__':
         # history = model.fit(train, epochs=25, batch_size=8)
         # model.save_weights(file_name_save+"_"+str(i))
         model.load_weights(file_name_save+"_"+str(i))
-        models.append(model)
         
-        _, _, _, _, _, z_test = models[i].encoder.predict(test)
-        _, _, _, reconstruction_test = models[i].decoder(z_test)
+        _, _, _, _, _, z_test = model.encoder.predict(test)
+        _, _, _, reconstruction_test = model.decoder(z_test)
     
         ret = meanErr(test, reconstruction_test)
         list_merr.append(ret)
