@@ -11,7 +11,7 @@ import data_processing
 
 if __name__ == '__main__':
     
-    history = pd.read_csv('C:/Users/User/Desktop/冰水主機-銀行/Merge.csv').dropna()
+    history = pd.read_csv('./dataset/Merge.csv').dropna()
     # cut parition
     history = history.iloc[:25000]
     history = data_processing.deduplicate(history, subject='時間')
@@ -22,7 +22,7 @@ if __name__ == '__main__':
     
     # PART TEST WITH MODIFIED ERROR
 
-    err = pd.read_csv('C:/Users/User/Desktop/冰水主機-銀行/err-0001.csv').dropna()
+    err = pd.read_csv('./dataset/err-0001.csv').dropna()
     # cut parition
     err = err.iloc[:25000]
     err = data_processing.deduplicate(err, subject='time')
