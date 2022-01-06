@@ -160,9 +160,9 @@ if __name__ == '__main__':
             }
         std_df = std_df.append(df, ignore_index=True)
         
-    std_df = std_df.set_index(['level_1', 'level_0'])
     
     std_df['opt'] = opt
+    std_df['level_1'] = std_df['level_1'].astype(int)
     std_df['div'] = std_df['opt'] / std_df['std']
     
     a = std_df.sort_values("div", ascending=False)
