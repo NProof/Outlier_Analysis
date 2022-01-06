@@ -122,7 +122,7 @@ if __name__ == '__main__':
     tf.keras.backend.set_floatx('float64')
     tf.keras.backend.floatx()
     
-    df_raw = pd.read_csv('./dataset/Merge.csv')
+    df_raw = pd.read_csv('../冰水主機-銀行/Merge.csv')
     
     ser_dup = ~df_raw['時間'].duplicated()
     f_df_raw = df_raw[ser_dup].reset_index(drop=True).dropna()
@@ -156,7 +156,7 @@ if __name__ == '__main__':
     
     # ---------------------------------------------
     
-    err_raw = pd.read_csv('./dataset/err-0001.csv')
+    err_raw = pd.read_csv('../冰水主機-銀行/err-0001.csv')
     
     ser_dup_err = ~err_raw['time'].duplicated()
     f_err_raw = err_raw[ser_dup_err].reset_index(drop=True).dropna()
