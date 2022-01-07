@@ -198,14 +198,16 @@ if __name__ == '__main__':
         ]
     ).apply(lambda i : i['label'].any())
 
-    a2['label'] = unstackLabel.iloc[a2.index]
-    a3 = a2.dropna()
+    a3 = a2.copy()
+    a3['label'] = unstackLabel.astype(int)
+    a3 = a3.dropna()
+    # a3['label'] = unstackLabel.iloc[a3.index]
     
-    # display(precision_recall_fscore_support(a3.label, a3["div"] > 10))
+    display(precision_recall_fscore_support(a3["label"], a3["div"] > 10))
     
-    # fpr, tpr, thresholds = roc_curve(a3.label, a3["div"], pos_label=1)
-    # print( roc_auc_score(a3.label, a3["div"]) )
+    fpr, tpr, thresholds = roc_curve(a3.label, a3["div"], pos_label=1)
+    print( roc_auc_score(a3.label, a3["div"]) )
     
-    # plt.plot(fpr, tpr)
-    # plt.show()
+    plt.plot(fpr, tpr)
+    plt.show()
     
