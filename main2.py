@@ -119,9 +119,9 @@ if __name__ == '__main__':
     test = dataPreProcessing(e_df1, time_h).T
     # e_df2 = pd.DataFrame(transformer.inverse_transform(e_df1), index=e_df1.index, columns=e_df1.columns)
     
-    file_name_save = "weightsModel/Q0107-01"
+    file_name_save = "weightsModel/Q0107-02"
     
-    nums_models = 9
+    nums_models = 8
     list_merr = []
     
     for i in range(nums_models):
