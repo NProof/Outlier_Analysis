@@ -202,6 +202,11 @@ if __name__ == '__main__':
     a3['label'] = unstackLabel.astype(int)
     a3 = a3.dropna()
     # a3['label'] = unstackLabel.iloc[a3.index]
+
+    # from sklearn.metrics import precision_score
+    # from sklearn.metrics import recall_score
+    # from sklearn.metrics import f1_score
+    # metric(a3["label"], a3["div"] > 10, average=None)
     
     display(precision_recall_fscore_support(a3["label"], a3["div"] > 10))
     
