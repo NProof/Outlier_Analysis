@@ -109,7 +109,7 @@ if __name__ == '__main__':
     label = err[["label"]]
     err = err[["冰機Q(sum)"]]
     
-    time_e['i'] = (60*time_e['h']+time_e['m']) // 15
+    time_e['i'] = (60*time_e['h']+time_e['m']) // delta
     
     unstackLabel = label.groupby(
         [
