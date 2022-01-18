@@ -109,6 +109,15 @@ if __name__ == '__main__':
     label = err[["label"]]
     err = err[["冰機Q(sum)"]]
     
+    time_e['i'] = (60*time_e['h']+time_e['m']) // delta
+    
+    unstackLabel = label.groupby(
+        [
+            lambda i : time_e.loc[i]['d'], 
+            lambda i : time_e.loc[i]['i']
+        ]
+    ).apply(lambda i : i['label'].any())
+
     e_df1 = pd.DataFrame(transformer.transform(err), index=err.index, columns=err.columns)
     test = dataPreProcessing(e_df1, time_h).T
     # e_df2 = pd.DataFrame(transformer.inverse_transform(e_df1), index=e_df1.index, columns=e_df1.columns)
@@ -139,7 +148,6 @@ if __name__ == '__main__':
     c.columns = pd.MultiIndex.from_tuples((i, j) for i, j in zip(range(nums_models), c.columns))
     del list_merr
     arg_opt = pd.DataFrame([abs(r).argmin() for i, r in c.iterrows()], index=c.index)
-    # c['arg'] = arg_opt
     opt = pd.Series([r.loc[arg_opt.loc[i]].values[0] for i, r in c.iterrows()], index=c.index)
     del arg_opt
     
@@ -151,7 +159,6 @@ if __name__ == '__main__':
     for i in sw_gen:
         scaler = preprocessing.MinMaxScaler()
         scaler.fit(np.array(i).reshape([-1, 1]))
-        # scaler.transform(np.array(i).reshape([-1, 1]))
         j = pd.DataFrame(scaler.transform(np.array(i**2).reshape([-1, 1])), index=i.index)
         j = j.reset_index()
         target = j.iloc[n-1]
@@ -178,32 +185,19 @@ if __name__ == '__main__':
     std_df['opt'] = opt2
     std_df['div'] = std_df['opt'] / std_df['std']
     
-    # a = std_df.sort_values("div", ascending=False)
-    a2 = std_df.sort_values("div", ascending=False)
+    std_df['label'] = unstackLabel.astype(int)
     
-    time_e['i'] = (60*time_e['h']+time_e['m']) // 15
-    
-    unstackLabel = label.groupby(
-        [
-            lambda i : time_e.loc[i]['d'], 
-            lambda i : time_e.loc[i]['i']
-        ]
-    ).apply(lambda i : i['label'].any())
-
-    a3 = a2.copy()
-    a3['label'] = unstackLabel.astype(int)
-    a3 = a3.dropna()
-    # a3['label'] = unstackLabel.iloc[a3.index]
+    df_metric = std_df.sort_values("div", ascending=False)
 
     # from sklearn.metrics import precision_score
     # from sklearn.metrics import recall_score
     # from sklearn.metrics import f1_score
     # metric(a3["label"], a3["div"] > 10, average=None)
     
-    display(precision_recall_fscore_support(a3["label"], a3["div"] > 10))
+    display(precision_recall_fscore_support(df_metric["label"], df_metric["div"] > 10))
     
-    fpr, tpr, thresholds = roc_curve(a3.label, a3["div"], pos_label=1)
-    print( roc_auc_score(a3.label, a3["div"]) )
+    fpr, tpr, thresholds = roc_curve(df_metric.label, df_metric["div"], pos_label=1)
+    print( roc_auc_score(df_metric.label, df_metric["div"]) )
     
     plt.plot(fpr, tpr)
     plt.show()
