@@ -31,15 +31,6 @@ if __name__ == "__main__":
     
     if not output_dir.is_dir():
         output_dir.mkdir()
-        
-    # for col in df_merge.columns:
-    #     print(col, end="")
-    #     cur_ser = df_merge[col]
-    #     print(" is ", end="")
-    #     _ = pd.concat([dates, i, cur_ser], keys=["date", "i", "val"], axis=1)
-    #     df_ser = _.pivot_table(index = "date", columns = "i", values = "val")
-    #     df_ser.to_csv(output_dir / (col + ".csv"))
-    #     print("finished.")
     
     for col, out_file_name in COVERT_COL.items():
         print(col, "->", out_file_name, end="")
