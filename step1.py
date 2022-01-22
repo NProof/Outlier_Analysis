@@ -23,13 +23,6 @@ def step1():
     _ = df_step1[~df_step1["時間"].duplicated()]
     df_step1 = _.dropna()
     
-    # # If you rum main.py, first run above @
-    # temps_step1 = df_step1.index # ++++++++++++++++++@
-    # _ = df_step1.copy() # ++++++++++++++++++@
-    # _.index = time_str # ++++++++++++++++++@
-    # _ = _.reset_index() # ++++++++++++++++++@
-    # backup_df_step1 = _ # ++++++++++++++++++@
-    
 # [END] #
 
     time_str = df_step1.pop("時間")

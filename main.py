@@ -51,6 +51,7 @@ if __name__ == "__main__":
     assert(origin_dir_path.exists())
     
     df_step1 = CombineXLSX(origin_dir_path)
+    backup_df_step1 = df_step1.copy() # [BACKUP]
     time_str = df_step1.pop("時間")
     temps_step1 = str2Datetime(time_str)
     
