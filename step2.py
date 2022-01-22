@@ -29,7 +29,7 @@ if __name__ == "__main__":
         "外氣溫度" : "outside_air_temp"
         }
     
-    if ~ output_dir.is_dir():
+    if not output_dir.is_dir():
         output_dir.mkdir()
         
     # for col in df_merge.columns:
