@@ -25,9 +25,9 @@ if __name__ == "__main__":
     
     temps_step2 = pd.to_datetime(df_merge.index.to_series())
     dates = temps_step2.apply(lambda _ : _.date())
-    hours = temps_step2.apply(lambda _ : _.hour)
-    minutes = temps_step2.apply(lambda _ : _.minute)
-    i = 60 * hours + minutes
+    # hours = temps_step2.apply(lambda _ : _.hour)
+    # minutes = temps_step2.apply(lambda _ : _.minute)
+    i = temps_step2.apply(lambda _ : 60 * _.hour + _.minute)
     
     if not output_dir.is_dir():
         output_dir.mkdir()
@@ -38,3 +38,4 @@ if __name__ == "__main__":
         _ = pd.concat([dates, i, cur_ser], keys=["date", "i", "val"], axis=1)
         df_ser = _.pivot_table(index = "date", columns = "i", values = "val")
         df_ser.to_csv(output_dir / (out_file_name + ".csv"))
+        
