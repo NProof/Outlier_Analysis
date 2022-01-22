@@ -16,7 +16,7 @@ if __name__ == "__main__":
     minutes = temps_step2.apply(lambda _ : _.minute)
     i = 60 * hours + minutes
     
-    name_map = {
+    COVERT_COL = {
         "冰機Vac" : "chiller_load",
         "temp1(冷卻水回水溫度#1)(Tcwrt1)" : "chr_temp",
         "temp1(冷卻水出水溫度#1)(Tcwst1)" : "chs_temp",
@@ -41,8 +41,8 @@ if __name__ == "__main__":
     #     df_ser.to_csv(output_dir / (col + ".csv"))
     #     print("finished.")
     
-    for col, out_file_name in name_map.items():
         print(col, end="")
+    for col, out_file_name in COVERT_COL.items():
         cur_ser = df_merge[col]
         print(" -> ", end="")
         _ = pd.concat([dates, i, cur_ser], keys=["date", "i", "val"], axis=1)
