@@ -41,11 +41,9 @@ if __name__ == "__main__":
     #     df_ser.to_csv(output_dir / (col + ".csv"))
     #     print("finished.")
     
-        print(col, end="")
     for col, out_file_name in COVERT_COL.items():
+        print(col, "->", out_file_name, end="")
         cur_ser = df_merge[col]
-        print(" -> ", end="")
         _ = pd.concat([dates, i, cur_ser], keys=["date", "i", "val"], axis=1)
         df_ser = _.pivot_table(index = "date", columns = "i", values = "val")
         df_ser.to_csv(output_dir / (out_file_name + ".csv"))
-        print(out_file_name)
