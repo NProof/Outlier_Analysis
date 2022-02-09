@@ -159,10 +159,10 @@ if __name__ == "__main__":
     
     label_15m = pd.concat([timeRead, date, i // 15, label], axis=1)
     G_15m = label_15m.groupby(["date", "i"]).label.any()
+    print(sum(G_15m)/len(G_15m), "(", sum(G_15m), "/", len(G_15m), ")")
+    
     label_day = pd.concat([timeRead, date, label], axis=1)
     G_day = label_day.groupby("date").label.any()
-    
-    print(sum(G_15m)/len(G_15m), "(", sum(G_15m), "/", len(G_15m), ")")
     # print(sum(G_day)/len(G_day), "(", sum(G_day), "/", len(G_day), ")")
     
     G_day.to_csv(day_label_fn)
