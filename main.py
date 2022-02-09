@@ -79,19 +79,8 @@ COVERT_COL = {
     "外氣溫度" : "outside_air_temp"
     }
     
-# (Q1) 資料中的時間格式不一致
-    # (A1) str2Datetime(str_series)
-
-# step1 : Combine all of data into one file.
-# step2 : Split into individual feature data
-# step3 : 產生人為修改的資料集
-
-# later : 
-    # 1) metric design
-    # 2) predict algorithm
-    
-if __name__ == "__main__":
-    # step1
+# step1
+def combineData():
     # 確認目錄是否合法
     assert(origin_dir_path.exists())
     
@@ -106,7 +95,8 @@ if __name__ == "__main__":
     df_step1.columns = df_step1.columns.to_series().apply(lambda _ : _.replace("\n", ""))
     df_step1.to_csv(combine_file_path)
     
-    # step2
+# step2
+def splitIndData():
     # 讀取step1合併的資料集，並另第一欄(timestamp)作為index
     df_merge = pd.read_csv(combine_file_path, index_col = 0)
     
@@ -116,13 +106,6 @@ if __name__ == "__main__":
     # 轉換temps成兩個欄位(date, i)，date是日期，i是每天第i個分鐘的意思
     date = temps_step2.apply(lambda _ : _.date()).rename("date")
     i = temps_step2.apply(lambda _ : 60 * _.hour + _.minute).rename("i")
-    
-    # i1440Date = pd.concat(
-    #     [
-    #         timeRead.apply(lambda _ : _.date()).rename('date'),
-    #         timeRead.apply(lambda _ : 60 * _.hour + _.minute).rename('i')
-    #     ], axis = 1
-    # )
     
     # 若資料夾不存在，創建它
     if not output_dir.is_dir():
@@ -137,7 +120,8 @@ if __name__ == "__main__":
         df_ser = _.pivot_table(index = "date", columns = "i", values = "val")
         df_ser.to_csv(output_dir / (out_file_name + ".csv"))
     
-    # step3
+# step3
+def modifyData():
     # [同] 讀取step1合併的資料集，並另第一欄(timestamp)作為index
     df_merge = pd.read_csv(combine_file_path, index_col = 0)
     
@@ -174,4 +158,20 @@ if __name__ == "__main__":
     t_G_day = pd.read_csv(day_label_fn, index_col = 0)["label"]
     print(sum(t_G_day)/len(t_G_day), "(", sum(t_G_day), "/", len(t_G_day), ")")
     # print(t_G_day)
+    
+# (Q1) 資料中的時間格式不一致
+    # (A1) str2Datetime(str_series)
+
+# step1 : Combine all of data into one file.
+# step2 : Split into individual feature data
+# step3 : 產生人為修改的資料集
+
+# later : 
+    # 1) metric design
+    # 2) predict algorithm
+    
+if __name__ == "__main__":
+    combineData()
+    splitIndData()
+    modifyData()
     
