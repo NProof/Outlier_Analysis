@@ -115,12 +115,15 @@ if __name__ == "__main__":
     temps_step2 = pd.to_datetime(df_merge.index.to_series())
 
     # 轉換temps成兩個欄位(date, i)，date是日期，i是每天第i個分鐘的意思
-    i1440Date = pd.concat(
-        [
-            temps_step2.apply(lambda _ : _.date()).rename("date"),
-            temps_step2.apply(lambda _ : 60 * _.hour + _.minute).rename("i")
-         ], axis = 1
-        )
+    date = temps_step2.apply(lambda _ : _.date()).rename("date")
+    i = temps_step2.apply(lambda _ : 60 * _.hour + _.minute).rename("i")
+    
+    # i1440Date = pd.concat(
+    #     [
+    #         timeRead.apply(lambda _ : _.date()).rename('date'),
+    #         timeRead.apply(lambda _ : 60 * _.hour + _.minute).rename('i')
+    #     ], axis = 1
+    # )
     
     # 若資料夾不存在，創建它
     if not output_dir.is_dir():
@@ -131,7 +134,7 @@ if __name__ == "__main__":
     for col, out_file_name in COVERT_COL.items():
         print('{:^25}->{:^20}'.format(col, out_file_name))
         cur_ser = df_merge[col].rename("val")
-        _ = pd.concat([i1440Date, cur_ser], axis = 1)
+        _ = pd.concat([date, i, cur_ser], axis=1)
         df_ser = _.pivot_table(index = "date", columns = "i", values = "val")
         df_ser.to_csv(output_dir / (out_file_name + ".csv"))
     
@@ -151,16 +154,12 @@ if __name__ == "__main__":
     # print(labelRead)
     
     timeRead = pd.to_datetime(labelRead.index.to_series())
-    i1440Date = pd.concat(
-        [
-            timeRead.apply(lambda _ : _.date()).rename('date'),
-            timeRead.apply(lambda _ : 60 * _.hour + _.minute).rename('i')
-        ], axis = 1
-    )
+    date = timeRead.apply(lambda _ : _.date()).rename("date")
+    i = timeRead.apply(lambda _ : 60 * _.hour + _.minute).rename("i")
     
-    label_15m = pd.concat([timeRead, i1440Date.date, i1440Date.i // 15, label], axis=1)
+    label_15m = pd.concat([timeRead, date, i // 15, label], axis=1)
     G_15m = label_15m.groupby(["date", "i"]).label.any()
-    label_day = pd.concat([timeRead, i1440Date.date, label], axis=1)
+    label_day = pd.concat([timeRead, date, label], axis=1)
     G_day = label_day.groupby("date").label.any()
     
     print(sum(G_15m)/len(G_15m), "(", sum(G_15m), "/", len(G_15m), ")")
