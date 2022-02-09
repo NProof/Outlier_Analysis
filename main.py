@@ -146,7 +146,11 @@ def modifyData():
     # [附加資訊] 計算每15分鐘以及每天的是否修改標籤
     label_15m = pd.concat([temps_step3, date, i // 15, label], axis=1)
     G_15m = label_15m.groupby(["date", "i"]).label.any()
-    print(sum(G_15m)/len(G_15m), "(", sum(G_15m), "/", len(G_15m), ")")
+    print('{:.10f} ({}/{})'.format(
+        sum(G_15m)/len(G_15m),
+        sum(G_15m),
+        len(G_15m)
+    ))
     
     label_day = pd.concat([temps_step3, date, label], axis=1)
     G_day = label_day.groupby("date").label.any()
@@ -178,4 +182,9 @@ if __name__ == "__main__":
     # print(label_err)
     labelD_err = pd.read_csv(day_label_fn, index_col = 0)["label"]
     # print(labelD_err)
+    print('{:.6f} ({}/{})'.format(
+        sum(labelD_err)/len(labelD_err),
+        sum(labelD_err),
+        len(labelD_err)
+    ))
     
