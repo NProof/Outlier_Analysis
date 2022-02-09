@@ -106,7 +106,6 @@ if __name__ == "__main__":
     df_step1.columns = df_step1.columns.to_series().apply(lambda _ : _.replace("\n", ""))
     df_step1.to_csv(combine_file_path)
     
-    del origin_dir_path, formats, temps_step1
     # step2
     # 讀取step1合併的資料集，並另第一欄(timestamp)作為index
     df_merge = pd.read_csv(combine_file_path, index_col = 0)
