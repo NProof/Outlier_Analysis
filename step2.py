@@ -20,22 +20,26 @@ COVERT_COL = {
     }
     
 if __name__ == "__main__":
-    df_merge = pd.read_csv(combine_file_path)
-    df_merge = df_merge.set_index("timestamp")
+    # 讀取step1合併的資料集，並另第一欄(timestamp)作為index
+    df_merge = pd.read_csv(combine_file_path, index_col = 0)
     
+    # 因timestamp讀取後不會自動轉型成datetime，而是str型別，故轉型
     temps_step2 = pd.to_datetime(df_merge.index.to_series())
-    dates = temps_step2.apply(lambda _ : _.date())
-    # hours = temps_step2.apply(lambda _ : _.hour)
-    # minutes = temps_step2.apply(lambda _ : _.minute)
-    i = temps_step2.apply(lambda _ : 60 * _.hour + _.minute)
     
+    # 轉換temps成兩個欄位(date, i)，date是日期，i是每天第i個分鐘的意思
+    dates = temps_step2.apply(lambda _ : _.date()).rename("date")
+    i = temps_step2.apply(lambda _ : 60 * _.hour + _.minute).rename("i")
+    
+    # 若資料夾不存在，創建它
     if not output_dir.is_dir():
         output_dir.mkdir()
     
+    # 將單一特徵轉換型狀，以date作為index、i為欄位的表
+    # (只產生 COVERT_COL 中的表)
     for col, out_file_name in COVERT_COL.items():
-        print(col, "->", out_file_name, end="")
-        cur_ser = df_merge[col]
-        _ = pd.concat([dates, i, cur_ser], keys=["date", "i", "val"], axis=1)
+        print('{:^25}->{:^20}'.format(col, out_file_name))
+        cur_ser = df_merge[col].rename("val")
+        _ = pd.concat([dates, i, cur_ser], axis=1)
         df_ser = _.pivot_table(index = "date", columns = "i", values = "val")
         df_ser.to_csv(output_dir / (out_file_name + ".csv"))
         
