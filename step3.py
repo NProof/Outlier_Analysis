@@ -6,8 +6,6 @@ from pathlib import Path
 
 from scipy.stats import uniform
 
-combine_file_path = Path("../dataset/M01-12.csv") # 合併的資料集
-
 def dataModify_v1(df):
     noise = np.random.multivariate_normal(df.mean(), df.cov(), df.shape[0])
     
@@ -26,40 +24,44 @@ def dataModify_v1(df):
     assert not (df[label]==dfErr[label]).any().any()
     return label, dfErr
 
+combine_file_path = Path("../dataset/M01-12.csv") # 合併的資料集
+
+err_dir = Path("../dataset/o/")
+data_fn = err_dir / "data.csv"
+label_fn = err_dir / "eLabel.csv"
+day_label_fn = err_dir / "day_Label.csv"
+    
 if __name__ == "__main__":
-    df = pd.read_csv(combine_file_path, index_col = 0)
+    # 讀取step1合併的資料集，並另第一欄(timestamp)作為index
+    df_merge = pd.read_csv(combine_file_path, index_col = 0)
     
-    label, dfErr = dataModify_v1(df)
+    label, dfErr = dataModify_v1(df_merge)
     
-    err_dir = Path("../dataset/o/")
+    # 若資料夾不存在，創建它
     if not err_dir.is_dir():
         err_dir.mkdir()
     
-    data_fn = err_dir / "data.csv"
-    label_fn = err_dir / "eLabel.csv"
-    day_label_fn = err_dir / "day_Label.csv"
-    
+    # save 以及read 修改的資料
     dfErr.to_csv(data_fn, encoding='utf_8_sig')
     errRead = pd.read_csv(data_fn, index_col = 0)
     
+    # save 以及read 是否修改的時間戳對應表
     label.to_csv(label_fn)
     labelRead = pd.read_csv(label_fn, index_col = 0)
     # print(labelRead)
     
+    # 取得時間戳的date與i
     timeRead = pd.to_datetime(labelRead.index.to_series())
-    i1440Date = pd.concat(
-        [
-            timeRead.apply(lambda _ : _.date()).rename('date'),
-            timeRead.apply(lambda _ : 60 * _.hour + _.minute).rename('i')
-        ], axis = 1
-    )
+    date = timeRead.apply(lambda _ : _.date()).rename("date")
+    i = timeRead.apply(lambda _ : 60 * _.hour + _.minute).rename("i")
     
-    label_15m = pd.concat([timeRead, i1440Date.date, i1440Date.i // 15, label], axis=1)
+    # 計算每15分鐘以及每天的是否修改標籤
+    label_15m = pd.concat([timeRead, date, i // 15, label], axis=1)
     G_15m = label_15m.groupby(["date", "i"]).label.any()
-    label_day = pd.concat([timeRead, i1440Date.date, label], axis=1)
-    G_day = label_day.groupby("date").label.any()
-    
     print(sum(G_15m)/len(G_15m), "(", sum(G_15m), "/", len(G_15m), ")")
+    
+    label_day = pd.concat([timeRead, date, label], axis=1)
+    G_day = label_day.groupby("date").label.any()
     # print(sum(G_day)/len(G_day), "(", sum(G_day), "/", len(G_day), ")")
     
     G_day.to_csv(day_label_fn)

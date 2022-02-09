@@ -106,7 +106,6 @@ if __name__ == "__main__":
     df_step1.columns = df_step1.columns.to_series().apply(lambda _ : _.replace("\n", ""))
     df_step1.to_csv(combine_file_path)
     
-    del origin_dir_path, formats, temps_step1
     # step2
     # 讀取step1合併的資料集，並另第一欄(timestamp)作為index
     df_merge = pd.read_csv(combine_file_path, index_col = 0)
@@ -115,12 +114,15 @@ if __name__ == "__main__":
     temps_step2 = pd.to_datetime(df_merge.index.to_series())
 
     # 轉換temps成兩個欄位(date, i)，date是日期，i是每天第i個分鐘的意思
-    i1440Date = pd.concat(
-        [
-            temps_step2.apply(lambda _ : _.date()).rename("date"),
-            temps_step2.apply(lambda _ : 60 * _.hour + _.minute).rename("i")
-         ], axis = 1
-        )
+    date = temps_step2.apply(lambda _ : _.date()).rename("date")
+    i = temps_step2.apply(lambda _ : 60 * _.hour + _.minute).rename("i")
+    
+    # i1440Date = pd.concat(
+    #     [
+    #         timeRead.apply(lambda _ : _.date()).rename('date'),
+    #         timeRead.apply(lambda _ : 60 * _.hour + _.minute).rename('i')
+    #     ], axis = 1
+    # )
     
     # 若資料夾不存在，創建它
     if not output_dir.is_dir():
@@ -131,39 +133,41 @@ if __name__ == "__main__":
     for col, out_file_name in COVERT_COL.items():
         print('{:^25}->{:^20}'.format(col, out_file_name))
         cur_ser = df_merge[col].rename("val")
-        _ = pd.concat([i1440Date, cur_ser], axis = 1)
+        _ = pd.concat([date, i, cur_ser], axis=1)
         df_ser = _.pivot_table(index = "date", columns = "i", values = "val")
         df_ser.to_csv(output_dir / (out_file_name + ".csv"))
     
     # step3
-    df = pd.read_csv(combine_file_path, index_col = 0)
+    # [同] 讀取step1合併的資料集，並另第一欄(timestamp)作為index
+    df_merge = pd.read_csv(combine_file_path, index_col = 0)
     
-    label, dfErr = dataModify_v1(df)
+    label, dfErr = dataModify_v1(df_merge)
 
+    # 若資料夾不存在，創建它
     if not err_dir.is_dir():
         err_dir.mkdir()
     
+    # save 以及read 修改的資料
     dfErr.to_csv(data_fn, encoding='utf_8_sig')
     errRead = pd.read_csv(data_fn, index_col = 0)
     
+    # save 以及read 是否修改的時間戳對應表
     label.to_csv(label_fn)
     labelRead = pd.read_csv(label_fn, index_col = 0)
     # print(labelRead)
     
+    # 取得時間戳的date與i
     timeRead = pd.to_datetime(labelRead.index.to_series())
-    i1440Date = pd.concat(
-        [
-            timeRead.apply(lambda _ : _.date()).rename('date'),
-            timeRead.apply(lambda _ : 60 * _.hour + _.minute).rename('i')
-        ], axis = 1
-    )
+    date = timeRead.apply(lambda _ : _.date()).rename("date")
+    i = timeRead.apply(lambda _ : 60 * _.hour + _.minute).rename("i")
     
-    label_15m = pd.concat([timeRead, i1440Date.date, i1440Date.i // 15, label], axis=1)
+    # 計算每15分鐘以及每天的是否修改標籤
+    label_15m = pd.concat([timeRead, date, i // 15, label], axis=1)
     G_15m = label_15m.groupby(["date", "i"]).label.any()
-    label_day = pd.concat([timeRead, i1440Date.date, label], axis=1)
-    G_day = label_day.groupby("date").label.any()
-    
     print(sum(G_15m)/len(G_15m), "(", sum(G_15m), "/", len(G_15m), ")")
+    
+    label_day = pd.concat([timeRead, date, label], axis=1)
+    G_day = label_day.groupby("date").label.any()
     # print(sum(G_day)/len(G_day), "(", sum(G_day), "/", len(G_day), ")")
     
     G_day.to_csv(day_label_fn)
