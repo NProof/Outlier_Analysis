@@ -6,8 +6,6 @@ from pathlib import Path
 
 from scipy.stats import uniform
 
-combine_file_path = Path("../dataset/M01-12.csv") # 合併的資料集
-
 def dataModify_v1(df):
     noise = np.random.multivariate_normal(df.mean(), df.cov(), df.shape[0])
     
@@ -26,18 +24,20 @@ def dataModify_v1(df):
     assert not (df[label]==dfErr[label]).any().any()
     return label, dfErr
 
+combine_file_path = Path("../dataset/M01-12.csv") # 合併的資料集
+
+err_dir = Path("../dataset/o/")
+data_fn = err_dir / "data.csv"
+label_fn = err_dir / "eLabel.csv"
+day_label_fn = err_dir / "day_Label.csv"
+    
 if __name__ == "__main__":
     df = pd.read_csv(combine_file_path, index_col = 0)
     
     label, dfErr = dataModify_v1(df)
     
-    err_dir = Path("../dataset/o/")
     if not err_dir.is_dir():
         err_dir.mkdir()
-    
-    data_fn = err_dir / "data.csv"
-    label_fn = err_dir / "eLabel.csv"
-    day_label_fn = err_dir / "day_Label.csv"
     
     dfErr.to_csv(data_fn, encoding='utf_8_sig')
     errRead = pd.read_csv(data_fn, index_col = 0)
