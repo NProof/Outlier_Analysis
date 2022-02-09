@@ -92,7 +92,7 @@ def combineData():
     # 把 index <- temps_step1 / columns name 去除 "\n"
     df_step1.index = temps_step1
     df_step1.columns = df_step1.columns.to_series().apply(lambda _ : _.replace("\n", ""))
-    df_step1.to_csv(combine_file_path)
+    df_step1.to_csv(combine_file_path, encoding='utf_8_sig')
     
 # step2
 def splitIndData():
