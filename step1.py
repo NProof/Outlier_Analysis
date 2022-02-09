@@ -13,6 +13,7 @@ def step1():
     # df_step1 = backup_df_step1.copy() # @------------------
     
     df_step1 = pd.DataFrame()
+    backup_df_step1 = df_step1.copy() # [BACKUP]
     
     files = origin_dir_path.iterdir()
     for file in files:
