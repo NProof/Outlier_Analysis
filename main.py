@@ -139,9 +139,9 @@ if __name__ == "__main__":
         df_ser.to_csv(output_dir / (out_file_name + ".csv"))
     
     # step3
-    df = pd.read_csv(combine_file_path, index_col = 0)
+    df_merge = pd.read_csv(combine_file_path, index_col = 0)
     
-    label, dfErr = dataModify_v1(df)
+    label, dfErr = dataModify_v1(df_merge)
 
     if not err_dir.is_dir():
         err_dir.mkdir()

@@ -32,9 +32,9 @@ label_fn = err_dir / "eLabel.csv"
 day_label_fn = err_dir / "day_Label.csv"
     
 if __name__ == "__main__":
-    df = pd.read_csv(combine_file_path, index_col = 0)
+    df_merge = pd.read_csv(combine_file_path, index_col = 0)
     
-    label, dfErr = dataModify_v1(df)
+    label, dfErr = dataModify_v1(df_merge)
     
     if not err_dir.is_dir():
         err_dir.mkdir()
