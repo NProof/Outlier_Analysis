@@ -79,7 +79,7 @@ COVERT_COL = {
     "外氣溫度" : "outside_air_temp"
     }
     
-# step1
+# Combine all of data into one file.
 def combineData():
     # 確認目錄是否合法
     assert(origin_dir_path.exists())
@@ -94,7 +94,7 @@ def combineData():
     df_step1.columns = df_step1.columns.to_series().apply(lambda _ : _.replace("\n", ""))
     df_step1.to_csv(combine_file_path, encoding='utf_8_sig')
     
-# step2
+# Split into individual feature data
 def splitIndData():
     # 讀取step1合併的資料集，並另第一欄(timestamp)作為index
     df_merge = pd.read_csv(combine_file_path, index_col = 0)
@@ -119,7 +119,7 @@ def splitIndData():
         df_ser = _.pivot_table(index = "date", columns = "i", values = "val")
         df_ser.to_csv(output_dir / (out_file_name + ".csv"))
     
-# step3
+# 產生人為修改的資料集並儲存
 def modifyData():
     # [同] 讀取step1合併的資料集，並另第一欄(timestamp)作為index
     df_merge = pd.read_csv(combine_file_path, index_col = 0)
@@ -130,33 +130,30 @@ def modifyData():
     if not err_dir.is_dir():
         err_dir.mkdir()
     
-    # save 以及read 修改的資料
+    # save 修改的資料
     dfErr.to_csv(data_fn, encoding='utf_8_sig')
-    errRead = pd.read_csv(data_fn, index_col = 0)
     
-    # save 以及read 是否修改的時間戳對應表
+    # save 是否修改的時間戳對應表
     label.to_csv(label_fn)
-    labelRead = pd.read_csv(label_fn, index_col = 0)
-    # print(labelRead)
     
-    # 取得時間戳的date與i
-    timeRead = pd.to_datetime(labelRead.index.to_series())
-    date = timeRead.apply(lambda _ : _.date()).rename("date")
-    i = timeRead.apply(lambda _ : 60 * _.hour + _.minute).rename("i")
+    # 因timestamp讀取後不會自動轉型成datetime，而是str(object)型別，故轉型
+    temps_step3 = pd.to_datetime(label.index.to_series())
     
-    # 計算每15分鐘以及每天的是否修改標籤
-    label_15m = pd.concat([timeRead, date, i // 15, label], axis=1)
+    # 轉換temps成兩個欄位(date, i)，date是日期，i是每天第i個分鐘的意思
+    date = temps_step3.apply(lambda _ : _.date()).rename("date")
+    i = temps_step3.apply(lambda _ : 60 * _.hour + _.minute).rename("i")
+    
+    # [附加資訊] 計算每15分鐘以及每天的是否修改標籤
+    label_15m = pd.concat([temps_step3, date, i // 15, label], axis=1)
     G_15m = label_15m.groupby(["date", "i"]).label.any()
     print(sum(G_15m)/len(G_15m), "(", sum(G_15m), "/", len(G_15m), ")")
     
-    label_day = pd.concat([timeRead, date, label], axis=1)
+    label_day = pd.concat([temps_step3, date, label], axis=1)
     G_day = label_day.groupby("date").label.any()
     # print(sum(G_day)/len(G_day), "(", sum(G_day), "/", len(G_day), ")")
-    
     G_day.to_csv(day_label_fn)
-    t_G_day = pd.read_csv(day_label_fn, index_col = 0)["label"]
-    print(sum(t_G_day)/len(t_G_day), "(", sum(t_G_day), "/", len(t_G_day), ")")
-    # print(t_G_day)
+    
+    
     
 # (Q1) 資料中的時間格式不一致
     # (A1) str2Datetime(str_series)
@@ -173,4 +170,12 @@ if __name__ == "__main__":
     combineData()
     splitIndData()
     modifyData()
+    
+    # 讀取修改資料拆分的檔案
+    data_err = pd.read_csv(data_fn, index_col = 0)
+    # print(data_err)
+    label_err = pd.read_csv(label_fn, index_col = 0)
+    # print(label_err)
+    labelD_err = pd.read_csv(day_label_fn, index_col = 0)["label"]
+    # print(labelD_err)
     
