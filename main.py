@@ -58,7 +58,7 @@ combine_file_path = Path("../dataset/M01-12.csv") # 合併的資料集
 output_dir = Path("../dataset/combine_version") # 合併的單一特徵資料集
 
 # 人為修改資料集的資料夾與檔案路徑
-err_dir = Path("../dataset/o/")
+err_dir = Path("../dataset/test/")
 data_fn = err_dir / "data.csv"
 label_fn = err_dir / "eLabel.csv"
 day_label_fn = err_dir / "day_Label.csv"

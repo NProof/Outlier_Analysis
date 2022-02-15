@@ -26,7 +26,7 @@ def dataModify_v1(df):
 
 combine_file_path = Path("../dataset/M01-12.csv") # 合併的資料集
 
-err_dir = Path("../dataset/o/")
+err_dir = Path("../dataset/test/")
 data_fn = err_dir / "data.csv"
 label_fn = err_dir / "eLabel.csv"
 day_label_fn = err_dir / "day_Label.csv"
