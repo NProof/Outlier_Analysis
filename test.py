@@ -12,6 +12,9 @@ from scipy.spatial import distance
 from scipy.stats import zscore
 
 import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set_theme(style="whitegrid")
+
 from sklearn.metrics import roc_auc_score, roc_curve
 
 from sklearn.metrics import precision_recall_fscore_support
@@ -83,54 +86,74 @@ if __name__ == "__main__":
     # print(df_raw)
     df_raw_back = df_raw.copy()
 
-    f_df = df_raw.copy()
+    f_df = df_raw['冰機Q(sum)']
     
     train = DP(f_df, timestamp)
     
     model = LVAE(latent_dim = 6, fDim = train.shape[1])
     # model.built = True
-    # model.load_weights('../dataset/err_v2-0006/err_v2-0006.h5')
+    # model.load_weights('../dataset/err_v2-0006/err_v3-0006.h5')
     # model.built = False
     model.compile(optimizer=keras.optimizers.Adam(learning_rate=3e-5))
-    history = model.fit(train, epochs=369, batch_size=8) # 0
-    model.save_weights("../dataset/err_v2-0006/err_v2-0006.h5")
-    
-    h = 5
-    
+    history = model.fit(train, epochs=400, batch_size=8)
+    model.save_weights("../dataset/err_v2-0006/err_v3-0006_2.h5")
+
     c = model.transferESpace(train)
-    kde = KernelDensity(kernel='gaussian', bandwidth=h).fit(c)
-    k = pd.DataFrame(kde.score_samples(c), index=train.index, columns=['densityln'])
-    
-    showTimeSeries(k)
     
     data_err.index = pd.to_datetime(data_err.index.to_series())
     label_err.index = pd.to_datetime(label_err.index.to_series())
     labelD_err.index = pd.to_datetime(labelD_err.index.to_series())
     
-    test = DP(data_err, label_err.index.to_series())
-    
-    ####   ####   ####    ####
+    test = DP(data_err['冰機Q(sum)'], label_err.index.to_series())
     c_test = model.transferESpace(test)
-    k_test = pd.DataFrame(kde.score_samples(c_test), index=test.index, columns=['densityln'])
-
-    showTimeSeries(k_test)
+        
+    for h in [5.0]: #[5**i for i in np.linspace(start = -5, stop = 2, num = 50)]: # in [5.0]:
+        # h = 5.0
+        kde = KernelDensity(kernel='gaussian', bandwidth=h).fit(c)
+        k = pd.DataFrame(kde.score_samples(c), index=train.index, columns=['densityln'])
+        # showTimeSeries(k)
+        
+        k_test = pd.DataFrame(kde.score_samples(c_test), index=test.index, columns=['densityln'])
+        # showTimeSeries(k_test)
+        
+        k_test['z'] = (pd.DataFrame(k_test.densityln) - k_test.densityln.mean()) / k_test.densityln.std()
+        
+        fig, ax = plt.subplots(1, 1, sharex=True, figsize=(12, 16))
+        ax1 = sns.violinplot(ax=ax, orient='v', y=k.densityln)
+        fig.text(0.5, 0.04, "h = " + str(h), ha='center', fontsize = 20)
+        ax1.set_ylabel("density probability", fontsize = 20)
+        ax1.set_xlabel("traing data after KDE", fontsize = 20)
+        plt.show()
+        
+        # fig, axes = plt.subplots(1, 2, sharex=True, figsize=(12, 8))
+        # ax1 = sns.violinplot(ax=axes[0], orient='v', y=k.densityln)
+        # ax2 = sns.violinplot(ax=axes[1], orient='v', y=k_test.z)
+        # fig.text(0.5, 0.04, "h = " + str(h), ha='center', fontsize = 20)
+        # ax1.set_ylabel("density probability", fontsize = 20)
+        # ax2.set_ylabel("density probability with z-scores", fontsize = 20)
+        # plt.show()
+        
+        metric_Day = pd.DataFrame(data={
+            'ground_true' : ~labelD_err.loc[test.index], 
+            'predict' : k_test.z
+            })
+        
+        fpr, tpr, thresholds = roc_curve(metric_Day.ground_true, metric_Day.predict, pos_label=1)
+        print("h = " + str(h), ", AUC_ROC", roc_auc_score(metric_Day.ground_true, metric_Day.predict))
+        print(confusion_matrix(metric_Day.ground_true, metric_Day.predict > -3))
+        print(precision_recall_fscore_support(metric_Day.ground_true, metric_Day.predict > -3))
     
-    k_test['z'] = (pd.DataFrame(k_test.densityln) - k_test.densityln.mean()) / k_test.densityln.std()
     ####   ####   ####    ####
-    
-    metric_Day = pd.DataFrame(data={
-        'ground_true' : ~labelD_err.loc[test.index], 
-        'predict' : k_test.z
-        })
-    
-    print( metric_Day[metric_Day.predict<-3] )
+    # print( metric_Day[metric_Day.predict<-3] )
     
     ########
-    fpr, tpr, thresholds = roc_curve(metric_Day.ground_true, metric_Day.predict, pos_label=1)
-    print( roc_auc_score(metric_Day.ground_true, metric_Day.predict) )
+    # fpr, tpr, thresholds = roc_curve(metric_Day.ground_true, metric_Day.predict, pos_label=1)
+    # print( roc_auc_score(metric_Day.ground_true, metric_Day.predict) )
     
-    plt.plot(fpr, tpr)
-    plt.show()
+    # plt.plot(fpr, tpr)
+    # plt.show()
     
-    print(confusion_matrix(metric_Day.ground_true, metric_Day.predict > -3))
-    print(precision_recall_fscore_support(metric_Day.ground_true, metric_Day.predict > -3))
+    # print(confusion_matrix(metric_Day.ground_true, metric_Day.predict > -3))
+    # print(precision_recall_fscore_support(metric_Day.ground_true, metric_Day.predict > -3))
+    
+        
